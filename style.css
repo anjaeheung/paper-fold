@@ -1,0 +1,121 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: "Segoe UI", "Malgun Gothic", sans-serif;
+  background: radial-gradient(ellipse at 50% 30%, #3a3f4b 0%, #23262e 70%, #191b21 100%);
+  touch-action: none;
+}
+
+#view { position: fixed; inset: 0; display: block; touch-action: none; }
+
+#topbars {
+  position: fixed;
+  top: 8px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  z-index: 10;
+  width: calc(100vw - 10px);
+  pointer-events: none; /* 빈 영역은 3D 조작을 막지 않게 */
+}
+#topbars > * { pointer-events: auto; }
+
+#toolbar {
+  display: flex; gap: 6px; align-items: center;
+  flex-wrap: wrap; justify-content: center;
+  padding: 8px 10px;
+  background: rgba(20, 22, 28, 0.78);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  max-width: 100%;
+}
+
+#toolbar button {
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.07);
+  color: #e8eaf0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+}
+#toolbar button:hover { background: rgba(255,255,255,0.16); }
+#toolbar button.active { background: #4f7cff; border-color: #6f95ff; }
+#toolbar button:disabled { opacity: .35; cursor: default; }
+#toolbar .sep { width: 1px; height: 22px; background: rgba(255,255,255,0.15); margin: 0 3px; }
+
+#paperBar {
+  display: flex; gap: 6px;
+  flex-wrap: wrap; justify-content: center;
+  padding: 6px 8px;
+  background: rgba(20, 22, 28, 0.6);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  max-width: 100%;
+}
+#paperBar.hidden { display: none; }
+#paperBar button {
+  font-size: 13px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.07);
+  color: #e8eaf0;
+  cursor: pointer;
+}
+#paperBar button.active { background: #4f7cff; border-color: #6f95ff; }
+#paperBar button.openBtn { background: rgba(255, 186, 73, 0.14); border-color: rgba(255, 186, 73, 0.45); }
+#paperBar button.openBtn.hidden { display: none; }
+#paperBar button.locked { display: none; }
+
+.panel {
+  position: fixed;
+  bottom: 56px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 8px;
+  padding: 10px 12px;
+  background: rgba(20, 22, 28, 0.85);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+  z-index: 10;
+}
+.panel.hidden { display: none; }
+.panel button {
+  font-size: 14px;
+  padding: 8px 14px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.07);
+  color: #e8eaf0;
+  cursor: pointer;
+}
+.panel .dir.active { background: #4f7cff; border-color: #6f95ff; }
+
+#overlayPanel { align-items: center; flex-wrap: wrap; max-width: calc(100vw - 24px); }
+#overlaySrcs { display: flex; gap: 5px; flex-wrap: wrap; }
+#overlaySrcs button { font-size: 13px; padding: 6px 10px; }
+#overlaySrcs button.active { background: #4f7cff; border-color: #6f95ff; }
+#ovMirror.active { background: #4f7cff; border-color: #6f95ff; }
+#ovScale { width: 110px; accent-color: #4f7cff; }
+
+#hint {
+  position: fixed;
+  bottom: 14px; left: 50%;
+  transform: translateX(-50%);
+  padding: 7px 14px;
+  background: rgba(20, 22, 28, 0.6);
+  border-radius: 20px;
+  color: #aeb4c2;
+  font-size: 13px;
+  z-index: 9;
+  white-space: nowrap;
+  max-width: calc(100vw - 20px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

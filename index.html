@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>종이 접기 3D</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📄</text></svg>">
+<link rel="stylesheet" href="style.css?v=21">
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<div id="topbars">
+<div id="toolbar">
+  <button id="btnFront" title="앞면 이미지 올리기">🖼 앞면</button>
+  <button id="btnBack" title="뒷면 이미지 올리기">🖼 뒷면</button>
+  <span class="sep"></span>
+  <button id="btnFold" title="잡아서 끌면 접혀요">🤏 접기</button>
+  <button id="btnCut" title="선을 그으면 잘려요">✂ 오리기</button>
+  <button id="btnMove" title="조각을 끌어서 옮기기">✋ 옮기기</button>
+  <span class="sep"></span>
+  <button id="btnUndo" title="마지막 동작 취소">↩ 되돌리기</button>
+  <button id="btnReset" title="처음 상태로">⟲ 펴기</button>
+  <button id="btnFlip" title="반대편에서 보기">🔄 뒤집기</button>
+  <button id="btnLight" title="빛에 비추기 (앞뒤 겹쳐보기)">💡 비추기</button>
+  <button id="btnOverlay" title="다른 자료를 반투명하게 겹쳐 대보기">🗂 겹치기</button>
+</div>
+<div id="paperBar" class="hidden"></div>
+</div>
+
+<div id="overlayPanel" class="panel hidden">
+  <div id="overlaySrcs"></div>
+  <button id="ovFit" title="종이 크기에 딱 맞추기 (파일에 끼운 상태)">📄 맞추기</button>
+  <button id="ovMirror" title="좌우 반전">↔ 반전</button>
+  <input type="range" id="ovScale" min="20" max="220" value="100" title="크기">
+  <button id="ovClose">✕ 닫기</button>
+</div>
+
+<div id="dirPanel" class="panel hidden">
+  <button id="dirOver" class="dir active">⬆ 앞으로</button>
+  <button id="dirUnder" class="dir">⬇ 뒤로</button>
+</div>
+
+<div id="cutPanel" class="panel hidden">
+  <button id="cutLine" class="dir active">╱ 선으로</button>
+  <button id="cutRect" class="dir">▭ 네모로</button>
+</div>
+
+<div id="rotPanel" class="panel hidden">
+  <button id="rotCCW" title="왼쪽으로 15도">↺ 회전</button>
+  <button id="rotCW" title="오른쪽으로 15도">회전 ↻</button>
+</div>
+
+<div id="hint">드래그로 회전 · 휠/핀치로 확대축소</div>
+
+<input type="file" id="fileFront" accept="image/*" hidden>
+<input type="file" id="fileBack" accept="image/*" hidden>
+
+<canvas id="view"></canvas>
+<script type="module" src="main.js?v=21"></script>
+</body>
+</html>
