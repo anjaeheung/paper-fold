@@ -9,6 +9,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
    오리기 = 직선으로 전 조각 클리핑, 양쪽에 다른 pieceId 부여
    ============================================================ */
 
+// 사이트별 설정: index.html에서 window.KIT_CONFIG = { hideTools: ['fold', ...] } 로 도구 숨김
+const CFG = window.KIT_CONFIG || {};
+
 const LAYER_EPS = 0.1;        // 층 간격 (종이 두께)
 const MIN_AREA = 0.02;        // 이 미만 조각은 버림
 const BASE_H = 29.7;          // 종이 높이 고정(A4), 폭은 이미지 비율 따름
@@ -1558,21 +1561,39 @@ function buildPaperBar() {
   }
 })().catch(err => { window.__discover = { fatal: String(err && err.stack || err) }; });
 
+// ---------- 도구 숨김 (사이트별 설정) ----------
+const TOOL_BTN_IDS = {
+  front: 'btnFront', back: 'btnBack', fold: 'btnFold', cut: 'btnCut', move: 'btnMove',
+  undo: 'btnUndo', reset: 'btnReset', flip: 'btnFlip', light: 'btnLight', overlay: 'btnOverlay',
+};
+const hiddenTools = new Set(Array.isArray(CFG.hideTools) ? CFG.hideTools : []);
+for (const key of hiddenTools) {
+  document.getElementById(TOOL_BTN_IDS[key])?.classList.add('gone');
+}
+if (hiddenTools.size >= 6) { // 대부분 숨기면 구분선도 정리
+  document.querySelectorAll('#toolbar .sep').forEach(s => s.classList.add('gone'));
+}
+const toolOn = (key) => !hiddenTools.has(key);
+if (hiddenTools.size) { // 숨긴 도구는 하단 안내에서도 제외
+  HINTS.view = '드래그 회전 · 휠/핀치 확대' + (toolOn('flip') ? ' · X 뒤집기' : '') + ' · 1~9 탭';
+  if (mode === 'view') setHint(HINTS.view);
+}
+
 // ---------- 단축키 (한/영 무관하게 물리 키 기준) ----------
 window.addEventListener('keydown', (e) => {
   const t = e.target;
   if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
-  if (e.ctrlKey && e.code === 'KeyZ') { e.preventDefault(); document.getElementById('btnUndo').click(); return; }
+  if (e.ctrlKey && e.code === 'KeyZ') { e.preventDefault(); if (toolOn('undo')) document.getElementById('btnUndo').click(); return; }
   if (e.ctrlKey || e.metaKey || e.altKey) return;
   switch (e.code) {
-    case 'KeyF': toggleTool('fold'); break;
-    case 'KeyC': toggleTool('cut'); break;
-    case 'KeyV': toggleTool('move'); break;
-    case 'KeyZ': document.getElementById('btnUndo').click(); break;
-    case 'KeyR': document.getElementById('btnReset').click(); break;
-    case 'KeyX': startFlip(); break;
-    case 'KeyL': btnLight.click(); break;
-    case 'KeyO': btnOverlay.click(); break;
+    case 'KeyF': if (toolOn('fold')) toggleTool('fold'); break;
+    case 'KeyC': if (toolOn('cut')) toggleTool('cut'); break;
+    case 'KeyV': if (toolOn('move')) toggleTool('move'); break;
+    case 'KeyZ': if (toolOn('undo')) document.getElementById('btnUndo').click(); break;
+    case 'KeyR': if (toolOn('reset')) document.getElementById('btnReset').click(); break;
+    case 'KeyX': if (toolOn('flip')) startFlip(); break;
+    case 'KeyL': if (toolOn('light')) btnLight.click(); break;
+    case 'KeyO': if (toolOn('overlay')) btnOverlay.click(); break;
     case 'Escape':
       if (overlayOpen) closeOverlay();
       else setMode('view');
