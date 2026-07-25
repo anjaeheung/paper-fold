@@ -1419,6 +1419,7 @@ function saveCurrentPaperState() {
     facets: structuredClone(facets),
     undo: structuredClone(undoStack),
     paperW, frontImg, backImg, openMode,
+    cam: camera.position.toArray(), // 탭마다 시점(뒤집힘 포함)을 따로 기억
   });
 }
 
@@ -1456,6 +1457,7 @@ function switchPaper(idx, initial = false) {
     saveCurrentPaperState();
   }
   currentPaper = idx;
+  flipAnim = null; // 진행 중이던 카메라 애니메이션 중단
   const st = paperStates.get(idx);
   if (st) {
     facets = structuredClone(st.facets);
@@ -1464,11 +1466,13 @@ function switchPaper(idx, initial = false) {
     paperW = st.paperW; paperH = BASE_H;
     frontImg = st.frontImg; backImg = st.backImg;
     openMode = st.openMode ?? false;
+    if (st.cam) camera.position.set(st.cam[0], st.cam[1], st.cam[2]);
   } else {
     openMode = false;
     applyModeImages();
     facets = [initialFacet()];
     undoStack.length = 0;
+    camera.position.set(0, -42, 30); // 새 탭은 정면 기본 시점
   }
   selectedPiece = null;
   rebuildTextures();
