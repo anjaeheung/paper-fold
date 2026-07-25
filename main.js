@@ -830,7 +830,7 @@ const dirUnderBtn = document.getElementById('dirUnder');
 function setHint(t) { hint.textContent = t; }
 
 const HINTS = {
-  view: '드래그로 회전 · 휠/핀치로 확대축소',
+  view: '드래그 회전 · 휠 확대 · 키: 1~5 탭 · F접기 C오리기 V옮기기 Z되돌림 X뒤집기 L비추기 O겹치기',
   fold: '잡고 끌면 접혀요 · 접힌 부분을 반대로 끌면 펴져요(초록 선) · 우클릭 회전',
   cut: '드래그로 자를 선을 그으세요 · 우클릭 회전',
   cutRect: '네모를 드래그로 그리면 그 부분이 뚝 떼어져요 · 우클릭 회전',
@@ -1557,6 +1557,42 @@ function buildPaperBar() {
     }
   }
 })().catch(err => { window.__discover = { fatal: String(err && err.stack || err) }; });
+
+// ---------- 단축키 (한/영 무관하게 물리 키 기준) ----------
+window.addEventListener('keydown', (e) => {
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+  if (e.ctrlKey && e.code === 'KeyZ') { e.preventDefault(); document.getElementById('btnUndo').click(); return; }
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  switch (e.code) {
+    case 'KeyF': toggleTool('fold'); break;
+    case 'KeyC': toggleTool('cut'); break;
+    case 'KeyV': toggleTool('move'); break;
+    case 'KeyZ': document.getElementById('btnUndo').click(); break;
+    case 'KeyR': document.getElementById('btnReset').click(); break;
+    case 'KeyX': startFlip(); break;
+    case 'KeyL': btnLight.click(); break;
+    case 'KeyO': btnOverlay.click(); break;
+    case 'Escape':
+      if (overlayOpen) closeOverlay();
+      else setMode('view');
+      break;
+    case 'Space':
+      if (btnOpen && !btnOpen.classList.contains('hidden')) { e.preventDefault(); btnOpen.click(); }
+      break;
+    default: {
+      const m = /^Digit([0-9])$/.exec(e.code);
+      if (m && papers.length) {
+        const n = +m[1];
+        const kit = papers.some(p => p.isKit);
+        const idx = kit ? n : n - 1;
+        if (idx < 0 || idx >= papers.length) break;
+        const chip = paperBar.children[idx];
+        if (chip && !chip.classList.contains('locked')) chip.click();
+      }
+    }
+  }
+});
 
 function animate() {
   requestAnimationFrame(animate);
