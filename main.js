@@ -833,7 +833,7 @@ const dirUnderBtn = document.getElementById('dirUnder');
 function setHint(t) { hint.textContent = t; }
 
 const HINTS = {
-  view: '드래그 회전 · 휠 확대 · 키: 1~5 탭 · F접기 C오리기 V옮기기 Z되돌림 X뒤집기 L비추기 O겹치기',
+  view: '드래그·WASD 회전 · 휠 확대 · 1~5 탭 · F접기 C오리기 V옮기기 Z되돌림 X뒤집기 L비추기 O겹치기',
   fold: '잡고 끌면 접혀요 · 접힌 부분을 반대로 끌면 펴져요(초록 선) · 우클릭 회전',
   cut: '드래그로 자를 선을 그으세요 · 우클릭 회전',
   cutRect: '네모를 드래그로 그리면 그 부분이 뚝 떼어져요 · 우클릭 회전',
@@ -1575,9 +1575,20 @@ if (hiddenTools.size >= 6) { // 대부분 숨기면 구분선도 정리
 }
 const toolOn = (key) => !hiddenTools.has(key);
 if (hiddenTools.size) { // 숨긴 도구는 하단 안내에서도 제외
-  HINTS.view = '드래그 회전 · 휠/핀치 확대' + (toolOn('flip') ? ' · X 뒤집기' : '') + ' · 1~9 탭';
+  HINTS.view = '드래그·WASD 회전 · 휠/핀치 확대' + (toolOn('flip') ? ' · X 뒤집기' : '') + ' · 1~9 탭';
   if (mode === 'view') setHint(HINTS.view);
 }
+
+// ---------- WASD 카메라 회전 (누르고 있는 동안 부드럽게) ----------
+const camKeys = new Set();
+const CAM_KEY_CODES = ['KeyW', 'KeyA', 'KeyS', 'KeyD'];
+window.addEventListener('keydown', (e) => {
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+  if (CAM_KEY_CODES.includes(e.code)) camKeys.add(e.code);
+});
+window.addEventListener('keyup', (e) => camKeys.delete(e.code));
+window.addEventListener('blur', () => camKeys.clear());
 
 // ---------- 단축키 (한/영 무관하게 물리 키 기준) ----------
 window.addEventListener('keydown', (e) => {
@@ -1615,8 +1626,24 @@ window.addEventListener('keydown', (e) => {
   }
 });
 
+let lastFrameT = performance.now();
 function animate() {
   requestAnimationFrame(animate);
+  const nowT = performance.now();
+  const dt = Math.min(0.05, (nowT - lastFrameT) / 1000);
+  lastFrameT = nowT;
+  if (camKeys.size) { // WASD 회전
+    flipAnim = null; // 진행 중 카메라 애니메이션과 충돌 방지
+    const s = getPolar();
+    let phi = s.phi, theta = s.theta;
+    const v = 1.8 * dt; // 초당 약 100도
+    if (camKeys.has('KeyA')) theta -= v;
+    if (camKeys.has('KeyD')) theta += v;
+    if (camKeys.has('KeyW')) phi -= v;
+    if (camKeys.has('KeyS')) phi += v;
+    phi = Math.max(0.03, Math.min(Math.PI - 0.03, phi));
+    setPolar(s.radius, phi, theta);
+  }
   if (flipAnim) {
     const k = Math.min(1, (performance.now() - flipAnim.t0) / 500);
     const e = k < 0.5 ? 2 * k * k : -1 + (4 - 2 * k) * k;
