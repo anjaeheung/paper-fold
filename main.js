@@ -207,11 +207,13 @@ function alignTopDown() { // 보고 있던 면의 정면으로
   animatePolarTo(s.phi > Math.PI / 2 ? Math.PI - 0.12 : 0.12);
 }
 
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
+function layoutRenderer() { // 분할 모드면 왼쪽 절반만 사용
+  const w = document.body.classList.contains('split') ? Math.floor(window.innerWidth / 2) : window.innerWidth;
+  camera.aspect = w / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+  renderer.setSize(w, window.innerHeight);
+}
+window.addEventListener('resize', layoutRenderer);
 
 // ---------- 텍스처 ----------
 let frontImg = null, backImg = null;
@@ -1565,13 +1567,23 @@ function buildPaperBar() {
 const TOOL_BTN_IDS = {
   front: 'btnFront', back: 'btnBack', fold: 'btnFold', cut: 'btnCut', move: 'btnMove',
   undo: 'btnUndo', reset: 'btnReset', flip: 'btnFlip', light: 'btnLight', overlay: 'btnOverlay',
-  popout: 'btnPopout',
+  split: 'btnSplit',
 };
 
-// 🗗 새창: 같은 사이트를 옆창으로 하나 더 (정보 두 개를 나란히 볼 때)
-document.getElementById('btnPopout')?.addEventListener('click', () => {
-  const w = Math.min(900, Math.round(screen.width / 2));
-  window.open(location.href, '_blank', `width=${w},height=${Math.round(screen.height * 0.9)},left=${screen.width - w}`);
+// ◫ 분할: 화면을 둘로 나눠 오른쪽에 같은 앱을 하나 더 (정보 두 개 나란히 보기)
+const btnSplit = document.getElementById('btnSplit');
+const splitPane = document.getElementById('splitPane');
+const splitFrame = document.getElementById('splitFrame');
+if (new URLSearchParams(location.search).has('split')) {
+  btnSplit?.classList.add('gone'); // 분할 안에서 또 분할은 막음
+}
+btnSplit?.addEventListener('click', () => {
+  const on = splitPane.classList.contains('hidden');
+  splitPane.classList.toggle('hidden', !on);
+  document.body.classList.toggle('split', on);
+  btnSplit.classList.toggle('active', on);
+  if (on && !splitFrame.src) splitFrame.src = location.pathname + '?split=1';
+  layoutRenderer();
 });
 const hiddenTools = new Set(Array.isArray(CFG.hideTools) ? CFG.hideTools : []);
 for (const key of hiddenTools) {
