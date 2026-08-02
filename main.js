@@ -1565,7 +1565,14 @@ function buildPaperBar() {
 const TOOL_BTN_IDS = {
   front: 'btnFront', back: 'btnBack', fold: 'btnFold', cut: 'btnCut', move: 'btnMove',
   undo: 'btnUndo', reset: 'btnReset', flip: 'btnFlip', light: 'btnLight', overlay: 'btnOverlay',
+  popout: 'btnPopout',
 };
+
+// 🗗 새창: 같은 사이트를 옆창으로 하나 더 (정보 두 개를 나란히 볼 때)
+document.getElementById('btnPopout')?.addEventListener('click', () => {
+  const w = Math.min(900, Math.round(screen.width / 2));
+  window.open(location.href, '_blank', `width=${w},height=${Math.round(screen.height * 0.9)},left=${screen.width - w}`);
+});
 const hiddenTools = new Set(Array.isArray(CFG.hideTools) ? CFG.hideTools : []);
 for (const key of hiddenTools) {
   document.getElementById(TOOL_BTN_IDS[key])?.classList.add('gone');
